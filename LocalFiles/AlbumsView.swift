@@ -6,7 +6,6 @@
 //
 
 // AlbumsView.swift
-
 import SwiftUI
 
 struct AlbumsView: View {
@@ -22,8 +21,9 @@ struct AlbumsView: View {
             ForEach(manager.albums) { album in
                 NavigationLink(destination:
                     AlbumDetailView(
+                        manager: manager,
                         album: album,
-                        songs: songs.filter { album.songIDs.contains($0.id) },
+                        allSongs: songs,
                         play: playAction,
                         selected: $selected
                     )

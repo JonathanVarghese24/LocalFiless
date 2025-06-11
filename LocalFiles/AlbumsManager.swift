@@ -30,6 +30,20 @@ class AlbumsManager: ObservableObject {
         albums.remove(atOffsets: offsets)
     }
 
+    /// Add one or more songs to an existing album
+    func addSongs(_ songIDs: [UUID], to album: Album) {
+        guard let idx = albums.firstIndex(where: { $0.id == album.id }) else { return }
+        for id in songIDs where !albums[idx].songIDs.contains(id) {
+            albums[idx].songIDs.append(id)
+        }
+    }
+
+    /// Remove songs at given offsets from an album
+    func removeSongs(at offsets: IndexSet, from album: Album) {
+        guard let idx = albums.firstIndex(where: { $0.id == album.id }) else { return }
+        albums[idx].songIDs.remove(atOffsets: offsets)
+    }
+
     private func load() {
         guard
             let data = UserDefaults.standard.data(forKey: saveKey),

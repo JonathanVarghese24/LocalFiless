@@ -30,6 +30,20 @@ class PlaylistsManager: ObservableObject {
         playlists.remove(atOffsets: offsets)
     }
 
+    /// Add one or more songs to an existing playlist
+    func addSongs(_ songIDs: [UUID], to playlist: Playlist) {
+        guard let idx = playlists.firstIndex(where: { $0.id == playlist.id }) else { return }
+        for id in songIDs where !playlists[idx].songIDs.contains(id) {
+            playlists[idx].songIDs.append(id)
+        }
+    }
+
+    /// Remove songs at given offsets from a playlist
+    func removeSongs(at offsets: IndexSet, from playlist: Playlist) {
+        guard let idx = playlists.firstIndex(where: { $0.id == playlist.id }) else { return }
+        playlists[idx].songIDs.remove(atOffsets: offsets)
+    }
+
     private func load() {
         guard
             let data = UserDefaults.standard.data(forKey: saveKey),
