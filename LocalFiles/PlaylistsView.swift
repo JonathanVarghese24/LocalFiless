@@ -6,6 +6,8 @@
 //
 //working
 
+// PlaylistsView.swift
+
 import SwiftUI
 
 struct PlaylistsView: View {
@@ -92,9 +94,7 @@ struct CreatePlaylistView: View {
                     .disabled(name.isEmpty)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    Button("Cancel") { dismiss() }
                 }
             }
         }

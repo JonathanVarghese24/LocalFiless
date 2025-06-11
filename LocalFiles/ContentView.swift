@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// ContentView.swift
+
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -25,11 +27,31 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            // Songs
-            NavigationView { songsList }
-                .tabItem { Label("Songs", systemImage: "music.note.list") }
+            // Songs Tab
+            NavigationView {
+                VStack {
+                    Button("Import Songs") { showImporter = true }
+                        .padding(.top)
 
-            // Albums
+                    List {
+                        ForEach(songs) { song in
+                            SongRow(song: song) { play(song) }
+                        }
+                        .onDelete(perform: deleteSongs)
+                    }
+                    .navigationTitle("Library")
+                }
+                .fileImporter(
+                    isPresented: $showImporter,
+                    allowedContentTypes: [.audio],
+                    allowsMultipleSelection: true
+                ) { result in
+                    handleImport(result)
+                }
+            }
+            .tabItem { Label("Songs", systemImage: "music.note.list") }
+
+            // Albums Tab
             NavigationView {
                 AlbumsView(
                     manager: albumsManager,
@@ -40,7 +62,7 @@ struct ContentView: View {
             }
             .tabItem { Label("Albums", systemImage: "rectangle.stack") }
 
-            // Playlists
+            // Playlists Tab
             NavigationView {
                 PlaylistsView(
                     manager: playlistsManager,
@@ -51,7 +73,7 @@ struct ContentView: View {
             }
             .tabItem { Label("Playlists", systemImage: "list.bullet.rectangle") }
 
-            // Now Playing
+            // Now Playing Tab
             NavigationView {
                 NowPlayingView(audioManager: audioManager,
                                song: selectedSong)
@@ -59,28 +81,19 @@ struct ContentView: View {
             .tabItem { Label("Now Playing", systemImage: "play.circle") }
         }
         .onAppear(perform: loadSongs)
-        .fileImporter(
-            isPresented: $showImporter,
-            allowedContentTypes: [.mp3, .mpeg4Audio],
-            allowsMultipleSelection: true
-        ) { handleImport($0) }
-    }
-
-    private var songsList: some View {
-        VStack {
-            Button("Import Songs") { showImporter = true }
-                .padding(.top)
-
-            List(songs) { song in
-                SongRow(song: song) { play(song) }
-            }
-        }
-        .navigationTitle("Library")
     }
 
     private func play(_ song: Song) {
         selectedSong = song
         audioManager.playSong(song)
+    }
+
+    private func deleteSongs(at offsets: IndexSet) {
+        for idx in offsets {
+            let s = songs[idx]
+            try? FileManager.default.removeItem(at: s.url)
+        }
+        songs.remove(atOffsets: offsets)
     }
 
     private func loadSongs() {
@@ -94,14 +107,15 @@ struct ContentView: View {
 
     private func handleImport(_ result: Result<[URL], Error>) {
         showImporter = false
-        if case .success(let urls) = result {
-            for url in urls {
-                let dest = documentsURL.appendingPathComponent(url.lastPathComponent)
-                if !FileManager.default.fileExists(atPath: dest.path) {
-                    try? FileManager.default.copyItem(at: url, to: dest)
-                }
+        guard case .success(let urls) = result else { return }
+        for url in urls {
+            guard url.startAccessingSecurityScopedResource() else { continue }
+            defer { url.stopAccessingSecurityScopedResource() }
+            let dst = documentsURL.appendingPathComponent(url.lastPathComponent)
+            if !FileManager.default.fileExists(atPath: dst.path) {
+                try? FileManager.default.copyItem(at: url, to: dst)
             }
-            loadSongs()
         }
+        loadSongs()
     }
 }

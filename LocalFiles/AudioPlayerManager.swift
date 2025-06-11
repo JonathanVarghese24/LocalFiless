@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// AudioPlayerManager.swift
+
 import Foundation
 import AVFoundation
 import MediaPlayer
@@ -18,37 +20,32 @@ class AudioPlayerManager: ObservableObject {
     private var timer: Timer?
     private var currentSong: Song?
 
-    init() { setupRemoteTransportControls() }
+    init() { setupRemoteControls() }
 
     func playSong(_ song: Song) {
         stop()
         currentSong = song
-        do {
-            player = try AVAudioPlayer(contentsOf: song.url)
-            player?.prepareToPlay()
-            duration = player?.duration ?? 0
-            player?.play()
-            isPlaying = true
-            startTimer()
-            updateNowPlayingInfo()
-        } catch {
-            print("⚠️ Playback error:", error)
-        }
-    }
-
-    func play() {
-        guard player != nil else { return }
+        player = try? AVAudioPlayer(contentsOf: song.url)
+        player?.prepareToPlay()
+        duration = player?.duration ?? 0
         player?.play()
         isPlaying = true
         startTimer()
-        updateNowPlayingInfo()
+        updateNowPlaying()
+    }
+
+    func play() {
+        player?.play()
+        isPlaying = true
+        startTimer()
+        updateNowPlaying()
     }
 
     func pause() {
         player?.pause()
         isPlaying = false
         stopTimer()
-        updateNowPlayingInfo()
+        updateNowPlaying()
     }
 
     func stop() {
@@ -60,7 +57,7 @@ class AudioPlayerManager: ObservableObject {
     func seek(to time: TimeInterval) {
         player?.currentTime = time
         currentTime = time
-        updateNowPlayingInfo()
+        updateNowPlaying()
     }
 
     private func startTimer() {
@@ -68,27 +65,26 @@ class AudioPlayerManager: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             guard let s = self, let p = s.player else { return }
             s.currentTime = p.currentTime
-            s.updateNowPlayingInfo()
+            s.updateNowPlaying()
         }
     }
+
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
     }
 
-    // MARK: – Remote & Lock-Screen Controls
-
-    private func setupRemoteTransportControls() {
+    private func setupRemoteControls() {
         let cc = MPRemoteCommandCenter.shared()
-        cc.playCommand.addTarget { [unowned self] _ in self.play(); return .success }
-        cc.pauseCommand.addTarget { [unowned self] _ in self.pause(); return .success }
-        cc.changePlaybackPositionCommand.addTarget { [unowned self] event in
-            guard let e = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-            self.seek(to: e.positionTime); return .success
+        cc.playCommand.addTarget { [unowned self] _ in play(); return .success }
+        cc.pauseCommand.addTarget { [unowned self] _ in pause(); return .success }
+        cc.changePlaybackPositionCommand.addTarget { [unowned self] evt in
+            guard let e = evt as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+            seek(to: e.positionTime); return .success
         }
     }
 
-    private func updateNowPlayingInfo() {
+    private func updateNowPlaying() {
         guard let song = currentSong else { return }
         var info: [String: Any] = [
             MPMediaItemPropertyTitle:               song.title,
@@ -97,9 +93,7 @@ class AudioPlayerManager: ObservableObject {
             MPMediaItemPropertyPlaybackDuration:    duration
         ]
         if let art = song.artwork {
-            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(
-                boundsSize: art.size
-            ) { _ in art }
+            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: art.size) { _ in art }
         }
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }

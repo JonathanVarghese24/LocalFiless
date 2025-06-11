@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// Album.swift
+
 import Foundation
 
 struct Album: Identifiable, Codable {

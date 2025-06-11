@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// AlbumDetailView.swift
+
 import SwiftUI
 
 struct AlbumDetailView: View {

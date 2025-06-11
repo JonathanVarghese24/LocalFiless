@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// Song.swift
+
 import UIKit
 import AVFoundation
 
@@ -47,8 +49,8 @@ struct Song: Identifiable, Hashable {
         // Artwork
         if let item = asset.commonMetadata.first(where: { $0.commonKey == .commonKeyArtwork }),
            let data = item.dataValue,
-           let image = UIImage(data: data) {
-            artwork = image
+           let img  = UIImage(data: data) {
+            artwork = img
         } else {
             artwork = nil
         }

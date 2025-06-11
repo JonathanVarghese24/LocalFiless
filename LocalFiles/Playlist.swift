@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// Playlist.swift
+
 import Foundation
 
 struct Playlist: Identifiable, Codable {

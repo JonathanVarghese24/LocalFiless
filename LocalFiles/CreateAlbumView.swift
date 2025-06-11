@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// CreateAlbumView.swift
+
 import SwiftUI
 
 struct CreateAlbumView: View {
@@ -38,9 +40,7 @@ struct CreateAlbumView: View {
                     .disabled(name.isEmpty)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    Button("Cancel") { dismiss() }
                 }
             }
         }

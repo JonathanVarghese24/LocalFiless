@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// LocalFilesApp.swift
+
 import SwiftUI
 import AVFoundation
 
@@ -13,18 +15,12 @@ struct LocalFilesApp: App {
     init() { configureAudioSession() }
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+        WindowGroup { ContentView() }
     }
 
     private func configureAudioSession() {
         let session = AVAudioSession.sharedInstance()
-        do {
-            try session.setCategory(.playback, mode: .default)
-            try session.setActive(true)
-        } catch {
-            print("⚠️ Audio session config failed:", error)
-        }
+        try? session.setCategory(.playback, mode: .default)
+        try? session.setActive(true)
     }
 }

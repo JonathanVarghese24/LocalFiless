@@ -5,6 +5,8 @@
 //  Created by JV on 6/11/25.
 //
 
+// NowPlayingView.swift
+
 import SwiftUI
 
 struct NowPlayingView: View {
@@ -15,37 +17,24 @@ struct NowPlayingView: View {
         VStack {
             if let song = song {
                 Spacer()
-
                 Image(uiImage: song.artwork ?? UIImage(systemName: "music.note")!)
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(8)
-                    .padding()
+                    .resizable().scaledToFit()
+                    .cornerRadius(8).padding()
+                Text(song.title).font(.title2).padding(.top, 4)
+                Text(song.artist).font(.subheadline).foregroundColor(.secondary)
 
-                Text(song.title)
-                    .font(.title2)
-                    .padding(.top, 4)
-                Text(song.artist)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-
-                Slider(
-                    value: $audioManager.currentTime,
-                    in: 0...audioManager.duration
-                ) {
+                Slider(value: $audioManager.currentTime,
+                       in: 0...audioManager.duration) {
                     Text("Seek")
                 } onEditingChanged: { editing in
-                    if !editing {
-                        audioManager.seek(to: audioManager.currentTime)
-                    }
+                    if !editing { audioManager.seek(to: audioManager.currentTime) }
                 }
                 .padding()
 
                 HStack {
                     Spacer()
                     Button { /* prev */ } label: {
-                        Image(systemName: "backward.fill")
-                            .font(.largeTitle)
+                        Image(systemName: "backward.fill").font(.largeTitle)
                     }
                     Spacer()
                     Button {
@@ -61,17 +50,14 @@ struct NowPlayingView: View {
                     }
                     Spacer()
                     Button { /* next */ } label: {
-                        Image(systemName: "forward.fill")
-                            .font(.largeTitle)
+                        Image(systemName: "forward.fill").font(.largeTitle)
                     }
                     Spacer()
                 }
                 .padding(.bottom)
-
                 Spacer()
             } else {
-                Text("No song selected")
-                    .foregroundColor(.secondary)
+                Text("No song selected").foregroundColor(.secondary)
             }
         }
         .navigationTitle("Now Playing")
